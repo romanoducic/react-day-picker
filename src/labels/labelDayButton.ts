@@ -25,5 +25,8 @@ export function labelDayButton(
   return label;
 }
 
-/** @deprecated Use `labelDayButton` instead. */
+/**
+ * @deprecated Use {@link labelDayButton} instead.
+ * @see https://daypicker.dev/next/upgrading
+ */
 export const labelDay = labelDayButton;

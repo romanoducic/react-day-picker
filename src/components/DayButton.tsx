@@ -32,3 +32,16 @@ export function DayButton(
 }
 
 export type DayButtonProps = Parameters<typeof DayButton>[0];
+
+/**
+ * @private
+ * @deprecated Use {@link DayButton} or {@link DayButton} components instead.
+ * @see https://daypicker.dev/next/upgrading
+ */
+export const DayDate = DayButton;
+/**
+ * @private
+ * @deprecated Use {@link DayButtonProps} or {@link DayProps} components instead.
+ * @see https://daypicker.dev/next/upgrading
+ */
+export type DayDateProps = Parameters<typeof DayButton>[0];

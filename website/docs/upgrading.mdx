@@ -2,60 +2,52 @@
 sidebar_position: 5
 ---
 
-# Upgrading
+# Upgrading to v9
 
-## Upgrade from v8 to v9
+DayPicker 9 includes important updates related to accessibility, styles, internationalization and performance. See the [changelog](./changelog.mdx) for the full list of changes.
 
-This major version introduce some important breaking changes. See the [changelog](./changelog.mdx) for the full list of changes.
+V9 include some breaking changes. Follow these steps to safely upgrade DayPicker in your project.
 
-:::warning Work In Progress
+## Checklist
 
-Please help us complete this guide by [opening an issue](https://github.com/gpbl/react-day-picker/discussions/categories/daypicker-v9).
+1. Update the dependencies
+2. Fix the CSS styles
+3. Updates for ARIA labels
+4. Update Formatters to return a string
+5. Update translations
+6. Check for deprecated props
+7. Update your Custom Components
+8. TypeScript: deprecated types
 
-:::
+### 1. Update the dependencies
 
-Follow these steps to upgrade your project from v8 to v9:
-
-### 1. Upgrade to the next version
+Update `react-day-picker` via npm. Remove `date-fns` from the dependencies if you are not using it directly in your app.
 
 ```bash npm2yarn
 npm install react-day-picker@next
+npm uninstall date-fns # optional
 ```
 
-### 2. Check for removed props
+### 2. Fix the CSS styles
 
-The following props have been removed. Check in your code if you are using them.
-
-| Removed prop | Notes                                                                                        |
-| ------------ | -------------------------------------------------------------------------------------------- |
-| ~`fromDate`~ | Replace it with the `hidden` prop and the `before` [Matcher](./api/type-aliases/Matcher.md). |
-| ~`toDate`~   | Replace it with the `hidden` prop and the `after` [Matcher](./api/type-aliases/Matcher.md).  |
+Make sure you import `react-day-picker/style.css` in your project:
 
 ```diff
-- <DayPicker fromDate={new Date(2010, 11, 03)} toDate={new Date(2012, 10, 01)} />
-+ <DayPicker hidden={[{ before: new Date(2010, 11, 03)}, { after: new Date(2012, 10, 01) }]} />
+- import 'react-day-picker/dist/style.css';
++ import 'react-day-picker/style.css';
 ```
 
-### 3. Check for deprecated props
 
-The following props have been deprecated, and will be removed in the next major version.
 
-| Deprecated prop | Replacement  | Notes                                                                   |
-| --------------- | ------------ | ----------------------------------------------------------------------- |
-| ~`fromMonth`~   | `startMonth` |                                                                         |
-| ~`toMonth`~     | `endMonth`   |                                                                         |
-| ~`fromYear`~    | `startMonth` | Pass the first month of the year, e.g. `startMonth = new Date(2024,0)`. |
-| ~`toYear`~      | `endMonth`   | Pass the last month of the year, e.g. `endMonth = new Date(2024,11)`.   |
-
-### 4. Updates for ARIA labels
+### 3. Updates for ARIA labels
 
 The following ARIA labels have been updated:
 
-| Label                                                   | Old label              | New label        |
-| ------------------------------------------------------- | ---------------------- | ---------------- |
-| [`labelPrevious`](./api/functions/labelPrevious)        | `Go to previous month` | `Previous Month` |
-| [`labelNext`](./api/functions/labelNext)                | `Go to next month`     | `Next Month`     |
-| [`labelWeekNumber`](./api/functions/labelWeekNumber.md) | `Week nr.`             | `Week`           |
+| Label                                                   | Old label              | New label                  |
+| ------------------------------------------------------- | ---------------------- | -------------------------- |
+| [`labelPrevious`](./api/functions/labelPrevious)        | `Go to previous month` | `Go to the Previous Month` |
+| [`labelNext`](./api/functions/labelNext)                | `Go to next month`     | `Go to the Next Month`     |
+| [`labelWeekNumber`](./api/functions/labelWeekNumber.md) | `Week nr. #`           | `Week ##`                  |
 
 You may need to update your test selectors — for example:
 
@@ -64,18 +56,43 @@ You may need to update your test selectors — for example:
 + screen.getByRole('button', 'Previous Month');
 ```
 
-### 5. Formatters: update to return a string
+### 4. Update Formatters to return a string
 
-The `formatters` prop now requires functions returning a `string` instead of a `ReactNode`.
-
-If you were [using the formatters](./docs/localization.mdx#formatters), you may need to update your code or use a `DayDate` component to render a `ReactElement` again: see [custom components guide](./guides//custom-components.mdx).
+If you are using [custom formatters](./docs/localization.mdx#formatters), the `formatters` functions now return a `string` instead of a `ReactNode`.
+Use [custom components](./guides/custom-components.mdx) to further customize the rendering of the caption, weekdays, and days.
 
 ```diff
 - const MyComponent = () => <DayPicker formatters={{ caption: () => <strong>My caption</strong> }} />;
 + const MyComponent = () => <DayPicker formatters={{ caption: () => 'My caption' }} />;
 ```
 
-### 6. Custom Components: update the hooks
+### 5. Update translations
+
+If you are offering DayPicker in multiple languages, you may need to update the translations. See the updated [translation guide](https://daypicker.dev/next/docs/translation).
+
+### 6. Check for deprecated props
+
+The following props have been deprecated, and will be removed in the next major version.
+
+| Deprecated prop | Notes                                                           |
+| --------------- | --------------------------------------------------------------- |
+| ~`fromMonth`~   | Renamed to `startMonth`.                                        |
+| ~`toMonth`~     | Renamed to `endMonth`.                                          |
+| ~`fromYear`~    | Use `startMonth` instead: e.g. `startMonth = new Date(2024,0)`. |
+| ~`toYear`~      | Use `endMonth` instead: e.g. `endMonth = new Date(2024,11)`.    |
+| ~`fromDate`~    | Use `startMonth` with the `hidden` prop.                        |
+| ~`toDate`~      | Use `startMonth` with the `hidden` prop.                        |
+
+#### About removing `fromDate` and `toDate`
+
+When using `startMonth` and `endMonth`, set the `hidden` prop to hide the unwantend days.
+
+```diff
+- <DayPicker fromDate={new Date(2010, 11, 03)} toDate={new Date(2012, 10, 01)} />
++ <DayPicker startMonth={new Date(2010,11)} startMonth={new Date(2012,10)}  hidden={[{ before: new Date(2010, 11, 03)}, { after: new Date(2012, 10, 01) }]} />
+```
+
+### 7. Update your Custom Components
 
 In case you are using DayPicker hooks in your custom components, you need to update your code:
 
@@ -84,7 +101,7 @@ In case you are using DayPicker hooks in your custom components, you need to upd
 | ~`useNavigation`~ | Included into [`useDayPicker`](./api/functions/useDayPicker.md).                                               |
 | ~`useDayRender`~  | Removed in favor of the `Day` custom component. See [custom components guide](./guides/custom-components.mdx). |
 
-### 7. TypeScript: check for deprecated types
+### 8. TypeScript: deprecated types
 
 Many typings have been deprecated in favor of clarity and shorter names. If you were using the typings, you may need to update your code or it will break in the next major version.
 

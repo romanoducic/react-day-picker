@@ -14,36 +14,33 @@ npm install react-day-picker@next
 
 ### What’s New in DayPicker 9
 
-This release includes important updates related to accessibility, styles, internationalization and performance.
+This release includes important updates related to accessibility, styles and internationalization.
 
 Visit https://daypicker.dev/playground to try it.
 
 #### At a glance
 
+- Removed `date-fns` from peer dependencies (now is a proper dependency).
 - Added support for [UTC dates](https://daypicker.dev/next/docs/localization#utc-dates) and [Jalali Calendar](https://daypicker.dev/next/docs/localization#jalali-calendar).
 - [Enhanced accessibility](https://daypicker.dev/next/docs/accessibility) to better comply with [WCAG21](https://www.w3.org/TR/WCAG21/) recommendations.
 - [Simplified styles](https://daypicker.dev/next/docs/styling) with new CSS variables.
-- Improved selection logic for range mode.
-- Improved typings and props for better compatibility in `strict` mode.
-- Improved rendering performance and reduced memory impact.
-- Added new `hideWeekdayRow` and `hideNavigation` props.
-- New `dropdown-years` and `dropdown-months` caption layouts.
-- Removed `date-fns` from peer dependencies (now is a proper dependency)
 - Updated for more complete [custom components](https://daypicker.dev/next/guides/custom-components) support.
+- Improved selection logic for `range` [selection mode](https://daypicker.dev/next/docs/selection-modes).
+- Improved typings and props for better compatibility in `strict` mode.
 
 #### Breaking Changes
 
-With v9 we tried to keep breaking changes to a minimum, but were inevitable to improve the library. Here are the most important changes:
+DayPicker v9 includes some breaking changes and deprecations.
 
 - The updated HTML output and ARIA labels could break some of your unit tests.
 - Some custom CSS styles may not work as some CSS classes have been renamed.
 - Custom Components have new API and may break.
-- Some typings have been renamed or deprecated.
 - The `useInput` hook has been removed. See [Input fields](https://daypicker.dev/next/guides/input-fields) guide for more details.
+- Some typings and props have been renamed or deprecated.
 
-#### Migration Guide
+#### Upgrade Guide
 
-We prepared a [migration guide](https://daypicker.dev/next/upgrading) for help upgrading your app to v9.
+We prepared a [upgrade guide](https://daypicker.dev/next/upgrading) for help migrating your app to v9.
 
 #### Help Testing this Version
 

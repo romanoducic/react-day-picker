@@ -13,5 +13,6 @@ export function formatYearDropdown(year: number): string {
  * @private
  * @deprecated Use `formatYearDropdown` instead.
  * @group Formatters
+ * @see https://daypicker.dev/next/upgrading
  */
 export const formatYearCaption = formatYearDropdown;

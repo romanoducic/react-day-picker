@@ -21,5 +21,6 @@ export function formatCaption(
  * @private
  * @deprecated Use {@link formatCaption} instead.
  * @group Formatters
+ * @see https://daypicker.dev/next/upgrading
  */
 export const formatMonthCaption = formatCaption;
