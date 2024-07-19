@@ -1,3 +1,5 @@
+import { useCallback, useMemo } from "react";
+
 import type {
   CalendarWeek,
   CalendarDay,
@@ -86,33 +88,91 @@ export interface UseCalendar {
 }
 
 /** @private */
-export function useCalendar(
-  props: Pick<
-    DayPickerProps,
-    | "fromYear"
-    | "toYear"
-    | "startMonth"
-    | "endMonth"
-    | "month"
-    | "defaultMonth"
-    | "today"
-    | "numberOfMonths"
-    | "disableNavigation"
-    | "onMonthChange"
-    | "ISOWeek"
-  >,
-  dateLib: DateLib
-) {
-  const today = dateLib.startOfDay(props.today ?? new dateLib.Date());
-
-  const [navigationStartMonth, navigationEndMonth] = getNavMonths(
-    props,
-    dateLib
-  );
+export function useCalendar(props: DayPickerProps, dateLib: DateLib) {
+  const {
+    ISOWeek,
+    fixedWeeks,
+    locale,
+    weekStartsOn,
+    startMonth,
+    endMonth,
+    captionLayout,
+    fromYear,
+    toYear,
+    fromMonth,
+    toMonth,
+    month,
+    defaultMonth,
+    numberOfMonths,
+    reverseMonths,
+    firstWeekContainsDate,
+    pagedNavigation,
+    disableNavigation,
+    onMonthChange
+  } = props;
 
   const { startOfMonth } = dateLib;
 
-  const initialDisplayMonth = getInitialMonth(props, dateLib);
+  const today = useMemo(
+    () => dateLib.startOfDay(props.today ?? new dateLib.Date()),
+    [dateLib, props.today]
+  );
+
+  const [navigationStartMonth, navigationEndMonth] = useMemo(
+    () =>
+      getNavMonths(
+        {
+          startMonth,
+          endMonth,
+          captionLayout,
+          fromYear,
+          toYear,
+          fromMonth,
+          toMonth,
+          today
+        },
+        dateLib
+      ),
+    [
+      captionLayout,
+      dateLib,
+      endMonth,
+      fromMonth,
+      fromYear,
+      startMonth,
+      toMonth,
+      toYear,
+      today
+    ]
+  );
+
+  const initialDisplayMonth = useMemo(
+    () =>
+      getInitialMonth(
+        {
+          fromYear,
+          toYear,
+          startMonth,
+          endMonth,
+          month,
+          defaultMonth,
+          today,
+          numberOfMonths
+        },
+        dateLib
+      ),
+    [
+      dateLib,
+      defaultMonth,
+      endMonth,
+      fromYear,
+      month,
+      numberOfMonths,
+      startMonth,
+      toYear,
+      today
+    ]
+  );
 
   // The first month displayed in the calendar
   const [firstMonth, setFirstMonth] = useControlledValue(
@@ -121,105 +181,210 @@ export function useCalendar(
   );
 
   /** An array of the months displayed in the calendar. */
-  const displayMonths = getDisplayMonths(
-    firstMonth,
-    navigationEndMonth,
-    props,
-    dateLib
+  const displayMonths = useMemo(
+    () =>
+      getDisplayMonths(
+        firstMonth,
+        navigationEndMonth,
+        { numberOfMonths },
+        dateLib
+      ),
+    [dateLib, firstMonth, navigationEndMonth, numberOfMonths]
   );
 
   /** The last month displayed in the calendar. */
   const lastMonth = displayMonths[displayMonths.length - 1];
 
   /** An array of the dates displayed in the calendar. */
-  const dates = getDates(displayMonths, props.endMonth, props, dateLib);
+  const dates = useMemo(
+    () =>
+      getDates(
+        displayMonths,
+        props.endMonth,
+        { ISOWeek, fixedWeeks, locale, weekStartsOn },
+        dateLib
+      ),
+    [
+      ISOWeek,
+      dateLib,
+      displayMonths,
+      fixedWeeks,
+      locale,
+      props.endMonth,
+      weekStartsOn
+    ]
+  );
 
   /** An array of the Months displayed in the calendar. */
-  const months = getMonths(displayMonths, dates, props, dateLib);
+  const months = useMemo(
+    () =>
+      getMonths(
+        displayMonths,
+        dates,
+        {
+          fixedWeeks,
+          ISOWeek,
+          locale,
+          weekStartsOn,
+          reverseMonths,
+          firstWeekContainsDate
+        },
+        dateLib
+      ),
+    [
+      ISOWeek,
+      dateLib,
+      dates,
+      displayMonths,
+      firstWeekContainsDate,
+      fixedWeeks,
+      locale,
+      reverseMonths,
+      weekStartsOn
+    ]
+  );
 
   /** An array of the Weeks displayed in the calendar. */
-  const weeks = getWeeks(months);
+  const weeks = useMemo(() => getWeeks(months), [months]);
 
   /** An array of the Days displayed in the calendar. */
-  const days = getDays(months);
+  const days = useMemo(() => getDays(months), [months]);
 
-  const previousMonth = getPreviousMonth(
-    firstMonth,
-    navigationStartMonth,
-    props,
-    dateLib
+  const previousMonth = useMemo(
+    () =>
+      getPreviousMonth(
+        firstMonth,
+        navigationStartMonth,
+        { numberOfMonths, pagedNavigation, disableNavigation },
+        dateLib
+      ),
+    [
+      dateLib,
+      disableNavigation,
+      firstMonth,
+      navigationStartMonth,
+      numberOfMonths,
+      pagedNavigation
+    ]
   );
-  const nextMonth = getNextMonth(
-    firstMonth,
-    navigationEndMonth,
-    props,
-    dateLib
+  const nextMonth = useMemo(
+    () =>
+      getNextMonth(
+        firstMonth,
+        navigationEndMonth,
+        { numberOfMonths, pagedNavigation, disableNavigation },
+        dateLib
+      ),
+    [
+      dateLib,
+      disableNavigation,
+      firstMonth,
+      navigationEndMonth,
+      numberOfMonths,
+      pagedNavigation
+    ]
   );
 
-  const { disableNavigation, onMonthChange } = props;
+  const isDayDisplayed = useCallback(
+    (day: CalendarDay) =>
+      weeks.some((week: CalendarWeek) =>
+        week.days.some((d) => d.isEqualTo(day))
+      ),
+    [weeks]
+  );
 
-  function isDayDisplayed(day: CalendarDay) {
-    return weeks.some((week: CalendarWeek) => {
-      return week.days.some((d) => {
-        return d.isEqualTo(day);
-      });
-    });
-  }
+  const goToMonth = useCallback(
+    (date: Date) => {
+      if (disableNavigation) {
+        return;
+      }
+      let newMonth = startOfMonth(date);
+      // if month is before start, use the first month instead
+      if (
+        navigationStartMonth &&
+        newMonth < startOfMonth(navigationStartMonth)
+      ) {
+        newMonth = startOfMonth(navigationStartMonth);
+      }
+      // if month is after endMonth, use the last month instead
+      if (navigationEndMonth && newMonth > startOfMonth(navigationEndMonth)) {
+        newMonth = startOfMonth(navigationEndMonth);
+      }
+      setFirstMonth(newMonth);
+      onMonthChange?.(newMonth);
+    },
+    [
+      disableNavigation,
+      navigationEndMonth,
+      navigationStartMonth,
+      onMonthChange,
+      setFirstMonth,
+      startOfMonth
+    ]
+  );
 
-  function goToMonth(date: Date) {
-    if (disableNavigation) {
-      return;
-    }
-    let newMonth = startOfMonth(date);
-    // if month is before start, use the first month instead
-    if (navigationStartMonth && newMonth < startOfMonth(navigationStartMonth)) {
-      newMonth = startOfMonth(navigationStartMonth);
-    }
-    // if month is after endMonth, use the last month instead
-    if (navigationEndMonth && newMonth > startOfMonth(navigationEndMonth)) {
-      newMonth = startOfMonth(navigationEndMonth);
-    }
-    setFirstMonth(newMonth);
-    onMonthChange?.(newMonth);
-  }
+  const goToDay = useCallback(
+    (day: CalendarDay) => {
+      if (isDayDisplayed(day)) {
+        return;
+      }
+      goToMonth(day.date);
+    },
+    [goToMonth, isDayDisplayed]
+  );
 
-  function goToDay(day: CalendarDay) {
-    if (isDayDisplayed(day)) {
-      return;
-    }
-    goToMonth(day.date);
-  }
-
-  function goToNextMonth() {
+  const goToNextMonth = useCallback(() => {
     return nextMonth ? goToMonth(nextMonth) : undefined;
-  }
-  function goToPreviousMonth() {
+  }, [goToMonth, nextMonth]);
+
+  const goToPreviousMonth = useCallback(() => {
     return previousMonth ? goToMonth(previousMonth) : undefined;
-  }
+  }, [goToMonth, previousMonth]);
 
-  const calendar: UseCalendar = {
-    dates,
-    months,
-    weeks,
-    days,
-    today,
+  const calendar: UseCalendar = useMemo(
+    () => ({
+      dates,
+      months,
+      weeks,
+      days,
+      today,
 
-    navigationStartMonth: navigationStartMonth,
-    navigationEndMonth: navigationEndMonth,
+      navigationStartMonth,
+      navigationEndMonth,
 
-    firstMonth: firstMonth,
-    lastMonth,
-    previousMonth,
-    nextMonth,
+      firstMonth: firstMonth,
+      lastMonth,
+      previousMonth,
+      nextMonth,
 
-    setFirstMonth,
+      setFirstMonth,
 
-    isDayDisplayed,
-    goToMonth,
-    goToDay,
-    goToNextMonth,
-    goToPreviousMonth
-  };
+      isDayDisplayed,
+      goToMonth,
+      goToDay,
+      goToNextMonth,
+      goToPreviousMonth
+    }),
+    [
+      dates,
+      days,
+      firstMonth,
+      goToDay,
+      goToMonth,
+      goToNextMonth,
+      goToPreviousMonth,
+      isDayDisplayed,
+      lastMonth,
+      months,
+      navigationEndMonth,
+      navigationStartMonth,
+      nextMonth,
+      previousMonth,
+      setFirstMonth,
+      today,
+      weeks
+    ]
+  );
 
   return calendar;
 }
