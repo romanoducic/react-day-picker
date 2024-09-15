@@ -35,7 +35,11 @@ export enum UI {
   MonthGrid = "month_grid",
   /** Contains the dropdown navigation or the caption label. */
   MonthCaption = "month_caption",
-  /** The dropdown with the months. */
+  /**
+   * The dropdown with the months.
+   *
+   * @since 9.1.0
+   */
   MonthsDropdown = "months_dropdown",
   /** Wrapper of the month grid. */
   Month = "month",
@@ -67,7 +71,11 @@ export enum UI {
   WeekNumber = "week_number",
   /** The cell header of the week numbers column. */
   WeekNumberHeader = "week_number_header",
-  /** The dropdown with the years. */
+  /**
+   * The dropdown with the years.
+   *
+   * @since 9.1.0
+   */
   YearsDropdown = "years_dropdown"
 }
 
