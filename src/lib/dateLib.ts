@@ -43,8 +43,9 @@ export type Locale = DateFnsLocale;
 export type { Month as DateFnsMonth } from "date-fns";
 
 /**
- * The date library used by DayPicker. It's a subset of the date-fns functions
- * plus an optional Date constructor.
+ * The date library used by DayPicker. It's a subset of the [date-fns
+ * functions](https://github.com/date-fns/date-fns/tree/main/src) plus an
+ * optional Date constructor.
  *
  * Override the default date library with the `dateLib` prop.
  */
