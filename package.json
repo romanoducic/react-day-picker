@@ -1,6 +1,6 @@
 {
-  "name": "react-day-picker",
-  "version": "9.1.3",
+  "name": "romano-day-picker",
+  "version": "1.0.0",
   "description": "Customizable Date Picker for React",
   "author": "Giampaolo Bellavite <io@gpbl.dev>",
   "homepage": "https://daypicker.dev",
@@ -189,7 +189,7 @@
     "typescript-css-modules": "^1.0.4"
   },
   "peerDependencies": {
-    "react": ">=16.8.0"
+    "react": "^19.0.0-rc-f994737d14-20240522"
   },
   "funding": {
     "type": "individual",
